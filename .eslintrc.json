@@ -1,0 +1,10 @@
+{
+  "extends": ["airbnb-base", "prettier"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "func-names": "off",
+    "object-shorthand": "off",
+    "class-methods-use-this": "off"
+  }
+}
