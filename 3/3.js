@@ -46,11 +46,72 @@ function findGamma(data) {
     return '1';
   });
 }
-
-format('./input.txt').then((data) => {
+/**
+ * Solution 1 - Returns the product of gamma and epsilon as an integer.
+ * @param {Array} data
+ * @returns
+ */
+function powerConsumption(data) {
   const gamma = findGamma(data);
   const epsilon = gamma.map((bit) => (bit === '0' ? '1' : '0'));
-  const solution1 =
-    parseInt(gamma.join(''), 2) * parseInt(epsilon.join(''), 2);
-  console.log(`Solution1: ${solution1}`);
-});
+  return parseInt(gamma.join(''), 2) * parseInt(epsilon.join(''), 2);
+}
+
+/**
+ * Filters the data array based on the value of the bit at 'position' and returns the filtered array with
+ * the elements with the most significant digit in that postion if the rating is 'oxygen', or the array with the elements
+ * with the least significant bit in that position if the rating is 'co2'.
+ * @param {Array} data
+ * @param {Number} position
+ * @param {String} rating
+ * @returns {Array} the filtered array based on the chosen rating
+ */
+function findRating(data, position, rating) {
+  const oneArray = [];
+  const zeroArray = [];
+  data.forEach((element) => {
+    if (element[position] === '0') zeroArray.push(element);
+    else oneArray.push(element);
+  });
+  if (rating === 'oxygen') {
+    if (oneArray.length >= zeroArray.length) return oneArray;
+    return zeroArray;
+  }
+  if (rating === 'co2') {
+    if (oneArray.length >= zeroArray.length) return zeroArray;
+    return oneArray;
+  }
+  throw new Error("Rating must be 'oxygen' or 'co2'");
+}
+
+/**
+ * Solution 2
+ * @param {Array} data
+ * @returns
+ */
+function lifeSupport(data) {
+  let position = 0;
+  const postionMax = data[0].length;
+
+  // filter data to initialize oxygen and co2
+  let oxygen = findRating(data, position, 'oxygen');
+  let co2 = findRating(data, position, 'co2');
+
+  // keep filtering untill both oxygen and co2 length is 1
+  while (oxygen.length > 1 || co2.length > 1) {
+    position += 1;
+    if (position > postionMax)
+      throw new Error('Position out of boundaries.');
+    if (oxygen.length > 1)
+      oxygen = findRating(oxygen, position, 'oxygen');
+    if (co2.length > 1) co2 = findRating(co2, position, 'co2');
+  }
+  return parseInt(oxygen, 2) * parseInt(co2, 2);
+}
+
+format('./input.txt')
+  .then((data) => {
+    console.log(`Solution 1: ${powerConsumption(data)}`);
+    console.log(`Solution 2: ${lifeSupport(data)}`);
+  })
+  .catch((err) => console.log(`${err}`));
