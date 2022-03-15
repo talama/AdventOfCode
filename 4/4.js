@@ -10,9 +10,9 @@ const fs = require('fs').promises;
  * @returns {Array[numbers, boards]}
  */
 async function format(input) {
-  const data = await (
-    await fs.readFile(input, 'utf-8')
-  ).split('\n\n');
+  const data = await (await fs.readFile(input, 'utf-8'))
+    .trim()
+    .split('\n\n');
 
   const numbers = data
     .shift()
@@ -30,26 +30,30 @@ async function format(input) {
   return [numbers, boards];
 }
 
-/** */
-function printBoard(board) {
-  const COLORS = {
-    red: '\x1b[31m',
-    blue: '\x1b[36m',
-    reset: '\x1b[0m',
-  };
+// /**
+//  * Helper function to print a board to console.
+//  * Print the called numbers in red and the non-called numbers in cyan.
+//  * @param {Array} board
+//  *
+// function printBoard(board) {
+//   const COLORS = {
+//     red: '\x1b[31m',
+//     cyan: '\x1b[36m',
+//     reset: '\x1b[0m',
+//   };
 
-  board.forEach((row) => {
-    let rowString = '';
-    row.forEach((number) => {
-      if (number.called)
-        rowString += `${COLORS.red} ${number.value}${COLORS.reset}`;
-      else
-        rowString += `${COLORS.blue} ${number.value}${COLORS.reset}`;
-    });
-    console.log(rowString);
-  });
-  console.log('');
-}
+//   board.forEach((row) => {
+//     let rowString = '';
+//     row.forEach((number) => {
+//       if (number.called)
+//         rowString += `${COLORS.red} ${number.value}${COLORS.reset}`;
+//       else
+//         rowString += `${COLORS.cyan} ${number.value}${COLORS.reset}`;
+//     });
+//     console.log(rowString);
+//   });
+//   console.log('');
+// }
 
 /**
  * Checks if a board is winning.
@@ -129,27 +133,59 @@ function getScore(board) {
 
 /**
  * Solution 1
- * @param {Array} boards
  * @param {Array} numbers
+ * @param {Array} boards
  * @returns {Number} - the board score * the winning number.
  */
-function solution1(boards, numbers) {
+function solution1(numbers, boards) {
   const localBoards = [...boards];
   let winningBoard;
 
-  const winningNumber = numbers.find((number, numIndex) => {
-    winningBoard = localBoards.find((board, boardIndex) => {
-      localBoards[boardIndex] = updateBoard(board, number);
-      return (
-        numIndex >= 4 && isWinner(localBoards[boardIndex], number)
-      );
-    });
-    if (winningBoard) return true;
-    return false;
-  });
+  // find a number for which we can find a winning board.
+  const winningNumber = numbers.find((num, numIndex) =>
+    localBoards.find((board, boardIndex) => {
+      // update the current board
+      localBoards[boardIndex] = updateBoard(board, num);
+      // if we find a winning board we store it in winningBoard
+      if (numIndex >= 4 && isWinner(localBoards[boardIndex])) {
+        winningBoard = localBoards[boardIndex];
+        return true;
+      }
+      return false;
+    }),
+  );
   return getScore(winningBoard) * winningNumber;
 }
+/**
+ * Solution 2
+ * @param {Array} numbers
+ * @param {Array} boards
+ * @returns {Number} - the last winning board score * last winning number
+ */
+function solution2(numbers, boards) {
+  let localBoards = [...boards];
+  let lastWinBoard;
+  let lastWinNum;
 
-format('./test.txt').then(([numbers, boards]) => {
-  console.log('Solution 1: ', solution1(boards, numbers));
+  numbers.forEach((num, numIndex) => {
+    // update every board with the current number and filter out the winning boards
+    localBoards = localBoards
+      .map((board) => updateBoard(board, num))
+      .filter((board) => {
+        if (numIndex >= 4 && isWinner(board)) {
+          // store the current last winning board and number
+          lastWinBoard = board;
+          lastWinNum = num;
+          return false;
+        }
+        return true;
+      });
+  });
+  return getScore(lastWinBoard) * lastWinNum;
+}
+
+// forma input and print solutions to console
+format('./input.txt').then(([numbers, boards]) => {
+  console.log('Solution 1: ', solution1(numbers, boards));
+  console.log('Solution 2: ', solution2(numbers, boards));
 });
