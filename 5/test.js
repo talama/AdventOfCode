@@ -2,7 +2,7 @@ const fs = require('fs').promises;
 
 async function format(path) {
   const data = await fs.readFile(path, 'utf-8');
-  return data
+  const lines = data
     .trim()
     .split('\n')
     .map((str) => {
@@ -13,20 +13,9 @@ async function format(path) {
         x2: +line[2],
         y2: +line[3],
       };
-    });
-}
+    })
+    .filter((line) => line.x1 === line.x2 || line.y1 === line.y2);
 
-// function printGrid(grid) {
-//   grid.forEach((row) => {
-//     let rowString = '';
-//     row.forEach((point) => {
-//       rowString += `${point}`;
-//     });
-//     console.log(rowString);
-//   });
-// }
-
-function getGrid(lines) {
   const gridSize = lines.reduce(
     (result, line) => {
       const grid = { ...result };
@@ -38,9 +27,17 @@ function getGrid(lines) {
     },
     { x: 0, y: 0 },
   );
-  return Array(gridSize.y)
-    .fill(0)
-    .map(() => Array(gridSize.x).fill(0));
+  return [lines, gridSize];
+}
+
+function printGrid(grid) {
+  grid.forEach((row) => {
+    let rowString = '';
+    row.forEach((point) => {
+      rowString += `${point}`;
+    });
+    console.log(rowString);
+  });
 }
 
 function drawLine(line, grid) {
@@ -68,19 +65,14 @@ function drawLine(line, grid) {
   return localGrid;
 }
 
-function solution1(lines) {
-  // remove non vertical/horizontal lines
-  const localLines = lines.filter(
-    (line) => line.x1 === line.x2 || line.y1 === line.y2,
-  );
+format('./input.txt').then(([lines, gridSize]) => {
+  let grid = Array(gridSize.y)
+    .fill(0)
+    .map(() => Array(gridSize.x).fill(0));
 
-  // create a grid and update it drawing each line
-  let grid = getGrid(lines);
-  localLines.forEach((line) => {
+  lines.forEach((line) => {
     grid = drawLine(line, grid);
   });
-
-  // count the points where 2 or more lines overlap
   const overlaps = grid.reduce((result, row) => {
     let current = result;
     row.forEach((point) => {
@@ -88,9 +80,5 @@ function solution1(lines) {
     });
     return current;
   }, 0);
-  return overlaps;
-}
-
-format('./test.txt').then((lines) => {
-  console.log('Solution 1: ', solution1(lines));
+  console.log('Solution 1: ', overlaps);
 });
