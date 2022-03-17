@@ -1,96 +1,74 @@
 const fs = require('fs').promises;
 
+/**
+ * Format input text file.
+ * @param {String} path - file path
+ * @returns {Array} - each element of the array is a line in the form [x1, y1, x2, y2]
+ */
 async function format(path) {
   const data = await fs.readFile(path, 'utf-8');
   return data
     .trim()
     .split('\n')
-    .map((str) => {
-      const line = str.match(/\d{1,3}/g);
-      return {
-        x1: +line[0],
-        y1: +line[1],
-        x2: +line[2],
-        y2: +line[3],
-      };
-    });
+    .map((str) => str.match(/\d+/g).map((num) => +num));
 }
-
-// function printGrid(grid) {
-//   grid.forEach((row) => {
-//     let rowString = '';
-//     row.forEach((point) => {
-//       rowString += `${point}`;
-//     });
-//     console.log(rowString);
-//   });
-// }
-
-function getGrid(lines) {
-  const gridSize = lines.reduce(
-    (result, line) => {
-      const grid = { ...result };
-      if (line.x1 > grid.x) grid.x = line.x1 + 1;
-      if (line.x2 > grid.x) grid.x = line.x2 + 1;
-      if (line.y1 > grid.y) grid.y = line.y1 + 1;
-      if (line.y2 > grid.y) grid.y = line.y2 + 1;
-      return grid;
-    },
-    { x: 0, y: 0 },
-  );
-  return Array(gridSize.y)
-    .fill(0)
-    .map(() => Array(gridSize.x).fill(0));
+/**
+ * Adds a point to the grid and sets its value to 1.
+ * If the point already exist increase its value instead.
+ * @param {Array} grid
+ * @param {String} key
+ * @returns {Number} - point value at 'key' coordinates
+ */
+function addPoint(grid, key) {
+  if (grid[key]) return grid[key] + 1;
+  return 1;
 }
-
-function drawLine(line, grid) {
-  const localGrid = [...grid];
-  const isHorizontal = line.y1 === line.y2;
-  if (isHorizontal) {
-    const y = line.y1;
-    const [xStart, xEnd] =
-      line.x1 <= line.x2 ? [line.x1, line.x2] : [line.x2, line.x1];
-    localGrid[y] = localGrid[y].map((point, index) => {
-      if (index >= xStart && index <= xEnd) {
-        return point + 1;
-      }
-      return point;
-    });
-  } else {
-    const x = line.x1;
-    const [yStart, yEnd] =
-      line.y1 <= line.y2 ? [line.y1, line.y2] : [line.y2, line.y1];
-    localGrid.forEach((row, rowIndex) => {
-      if (rowIndex >= yStart && rowIndex <= yEnd)
-        localGrid[rowIndex][x] += 1;
-    });
-  }
-  return localGrid;
-}
-
-function solution1(lines) {
-  // remove non vertical/horizontal lines
-  const localLines = lines.filter(
-    (line) => line.x1 === line.x2 || line.y1 === line.y2,
-  );
-
-  // create a grid and update it drawing each line
-  let grid = getGrid(lines);
-  localLines.forEach((line) => {
-    grid = drawLine(line, grid);
-  });
-
-  // count the points where 2 or more lines overlap
-  const overlaps = grid.reduce((result, row) => {
-    let current = result;
-    row.forEach((point) => {
-      if (point >= 2) current += 1;
-    });
-    return current;
+/**
+ *
+ * @param {Array} grid
+ * @returns {Number} Number of points where 2 or more lines overlap
+ */
+function getOverlaps(grid) {
+  const points = Object.keys(grid);
+  return points.reduce((result, current) => {
+    if (grid[current] > 1) return result + 1;
+    return result;
   }, 0);
-  return overlaps;
 }
 
-format('./test.txt').then((lines) => {
+/**
+ * Solution 1
+ * @param {Array} lines - array of lines where each line is in the form [x1, y1, x2, y2]
+ * @returns {Number} Number of points where 2 or more lines overlap
+ */
+function solution1(lines) {
+  const grid = {};
+  lines.forEach((line) => {
+    const [x1, y1, x2, y2] = [...line];
+    const isHorizontal = y1 === y2;
+    const isVertical = x1 === x2;
+    if (isHorizontal) {
+      // Determine the start and end of the x coord range
+      const [xStart, xEnd] = x1 <= x2 ? [x1, x2] : [x2, x1];
+      // for each x coord add the point to the grid and store the current number of overlaps as value
+      for (let x = xStart; x <= xEnd; x += 1) {
+        const key = `${x},${y1}`;
+        grid[key] = addPoint(grid, key);
+      }
+    }
+    if (isVertical) {
+      // Determine the start and end of the y coord range
+      const [yStart, yEnd] = y1 <= y2 ? [y1, y2] : [y2, y1];
+      // for each yy coord add the point to the grid and store the current number of overlaps as value
+      for (let y = yStart; y <= yEnd; y += 1) {
+        const key = `${x1},${y}`;
+        grid[key] = addPoint(grid, key);
+      }
+    }
+  });
+  return getOverlaps(grid);
+}
+
+format('./input.txt').then((lines) => {
   console.log('Solution 1: ', solution1(lines));
 });
