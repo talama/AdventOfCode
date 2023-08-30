@@ -3,7 +3,7 @@
     "lib": ["es2022"],
     "module": "nodenext",
     "target": "es6",
-    "rootDir": "./src/",
+    "rootDir": "./",
     "outDir": "./dist/",
     "strict": true,
     "esModuleInterop": true,
@@ -11,6 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "nodenext"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "2020/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
