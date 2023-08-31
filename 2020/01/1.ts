@@ -11,7 +11,7 @@ function format(input: string): Array<number> {
 
 /**
  * Solves twoSum and threeSum using hashmaps.
- * @param {string[]} number - Array of numbers to search in.
+ * @param {string[]} numList - Array of numbers to search in.
  * @param {string[]} target - target number for the sums.
  */
 function findSums(numList: number[], target: number): void {
