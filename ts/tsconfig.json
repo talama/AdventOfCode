@@ -11,6 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "nodenext"
   },
-  "include": ["src/**/*", "2020/**/*"],
+  "include": ["src/**/*", "2020/**/*", "2023/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
