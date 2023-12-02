@@ -1,9 +1,11 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+type Round = { [index: string]: number };
+
 type Game = {
   id: number;
-  rounds: { [index: string]: number }[];
+  rounds: Round[];
 };
 
 function format(input: string): Game[] {
@@ -12,9 +14,8 @@ function format(input: string): Game[] {
   return data.map((line) => {
     const game = line.split(':');
     const id = Number(game[0].slice(5));
-    console.log(id);
     const rounds = game[1].split(';').map((round) => {
-      const result: { [index: string]: number } = {};
+      const result: Round = {};
       keys.forEach((key) => {
         const index = round.indexOf(key);
         if (index !== -1) {
@@ -27,7 +28,7 @@ function format(input: string): Game[] {
   });
 }
 
-function solution1(data: Game[], bag: { [index: string]: number }): number {
+function solution1(data: Game[], bag: Round): number {
   let result = 0;
   data.forEach((game) => {
     if (
@@ -41,6 +42,23 @@ function solution1(data: Game[], bag: { [index: string]: number }): number {
   return result;
 }
 
+function solution2(data: Game[]): number {
+  let result = 0;
+  data.forEach((game) => {
+    const cubes: Round = { red: 1, green: 1, blue: 1 };
+    game.rounds.forEach((round) => {
+      Object.keys(cubes).forEach((key) => {
+        if (round[key] && round[key] > cubes[key]) {
+          cubes[key] = round[key];
+        }
+      });
+    });
+    result += cubes.red * cubes.green * cubes.blue;
+  });
+  return result;
+}
+
 const data = format('input.txt');
-const bag = { red: 12, green: 13, blue: 14 };
-console.log(solution1(data, bag));
+const bag : Round = { red: 12, green: 13, blue: 14 };
+console.log(`Solution1: ${solution1(data, bag)}`);
+console.log(`Solution2: ${solution2(data)}`);
