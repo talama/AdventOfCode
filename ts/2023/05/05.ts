@@ -43,26 +43,5 @@ function solution1(seeds: number[], almanac: number[][][]) {
     .reduce((acc, curr) => (curr < acc ? curr : acc));
 }
 
-function solution2(seeds: number[], almanac: number[][][]) {
-  const seedRanges: number[][] = [];
-  for (let i = 0; i < seeds.length; i += 2) {
-    seedRanges.push([seeds[i], seeds[i + 1]]);
-  }
-  const destinations: number[] = [];
-  seedRanges.forEach((range, idx) => {
-    for (let i = range[0]; i < range[0] + range[1]; i += 1) {
-      let destination = i;
-      almanac.forEach((mapping) => {
-        destination = mapSeed(mapping, destination);
-      });
-      if (!destinations[idx] || destination < destinations[idx]) {
-        destinations[idx] = destination;
-      }
-    }
-  });
-  return destinations.reduce((acc, curr) => (curr < acc ? curr : acc));
-}
-
-const [seeds, almanac] = format('input.txt');
-// console.log(solution2(seeds, almanac));
-console.log(`Solution1: ${solution1(seeds, almanac)}`);
+const [seeds, almanac] = format('test2.txt');
+console.log(solution1(seeds, almanac));
