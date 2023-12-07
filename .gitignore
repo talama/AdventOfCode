@@ -1,4 +1,6 @@
 .idea/
+**/input.txt
+**/test.txt
 
 # Logs
 logs
