@@ -6,7 +6,8 @@ type Hand = {
   bid: number;
 };
 
-const CARDS = '23456789TJQKA';
+const CARDS: string = '23456789TJQKA';
+const CARDS_JOKER = 'J23456789TQKA';
 
 function format(input: string): Hand[] {
   const data = readFileSync(join(__dirname, input), 'utf-8').trim().split('\n');
@@ -21,22 +22,40 @@ function getScore(hand: string) {
   hand.split('').forEach((char) => {
     const regex = new RegExp(`${char}`, 'g');
     const count = (hand.match(regex) || []).length;
-    if (count <= 1) {
-      score += 0;
-    } else if (count <= 3) {
+    if (count > 1) {
       score += count;
-    } else score += count + 1;
+    }
   });
   return score;
 }
 
-function sortHands(a: Hand, b: Hand): number {
-  const aScore = getScore(a.hand);
-  const bScore = getScore(b.hand);
+function getScoreJoker(hand: string) {
+  let score = 0;
+  if (hand.indexOf('J') !== -1) {
+    for (let i = 0; i < CARDS.length; i += 1) {
+      const tmpScore = getScore(hand.replaceAll('J', CARDS[i]));
+      if (tmpScore > score) {
+        score = tmpScore;
+      }
+    }
+  } else score = getScore(hand);
+  return score;
+}
+
+function sortHands(a: Hand, b: Hand, cards: string, isJoker: boolean): number {
+  let [aScore, bScore] = [0, 0];
+
+  if (isJoker) {
+    aScore = getScoreJoker(a.hand);
+    bScore = getScoreJoker(b.hand);
+  } else {
+    aScore = getScore(a.hand);
+    bScore = getScore(b.hand);
+  }
   if (aScore === bScore) {
     for (let i = 0; i < 5; i += 1) {
-      const aHigh = CARDS.indexOf(a.hand[i]);
-      const bHigh = CARDS.indexOf(b.hand[i]);
+      const aHigh = cards.indexOf(a.hand[i]);
+      const bHigh = cards.indexOf(b.hand[i]);
       if (aHigh > bHigh) {
         return 1;
       }
@@ -45,20 +64,16 @@ function sortHands(a: Hand, b: Hand): number {
       }
     }
   }
-  if (aScore > bScore) {
-    return 1;
-  }
-  if (aScore < bScore) {
-    return -1;
-  }
-  return 0;
+  return aScore - bScore;
 }
 
-function solution1(hands: Hand[]) {
+function solution(hands: Hand[], isJoker: boolean) {
+  const cards = isJoker ? CARDS_JOKER : CARDS;
   return hands
-    .sort((a, b) => sortHands(a, b))
+    .sort((a, b) => sortHands(a, b, cards, isJoker))
     .reduce((acc, curr, idx) => curr.bid * (idx + 1) + acc, 0);
 }
 
 const hands = format('input.txt');
-console.log(solution1(hands));
+console.log(`Solution1: ${solution(hands, false)}`);
+console.log(`Solution2: ${solution(hands, true)}`);
