@@ -6,7 +6,7 @@ type Hand = {
   bid: number;
 };
 
-const CARDS: string = '23456789TJQKA';
+const CARDS = '23456789TJQKA';
 const CARDS_JOKER = 'J23456789TQKA';
 
 function format(input: string): Hand[] {
@@ -17,41 +17,52 @@ function format(input: string): Hand[] {
   });
 }
 
-function getScore(hand: string) {
-  let score = 0;
-  hand.split('').forEach((char) => {
-    const regex = new RegExp(`${char}`, 'g');
-    const count = (hand.match(regex) || []).length;
-    if (count > 1) {
-      score += count;
+function getCards(hand: string): Record<string, number> {
+  const count: Record<string, number> = {};
+  hand.split('').forEach((card) => {
+    if (count[card]) {
+      count[card] += 1;
+    } else {
+      count[card] = 1;
     }
   });
-  return score;
+  return count;
 }
 
-function getScoreJoker(hand: string) {
-  let score = 0;
-  if (hand.indexOf('J') !== -1) {
-    for (let i = 0; i < CARDS.length; i += 1) {
-      const tmpScore = getScore(hand.replaceAll('J', CARDS[i]));
-      if (tmpScore > score) {
-        score = tmpScore;
-      }
-    }
-  } else score = getScore(hand);
-  return score;
+function getScore(hand: string, isJoker: boolean) {
+  const cards = getCards(hand);
+  let jokers = 0;
+  if (isJoker) {
+    jokers = cards.J ?? 0;
+    delete cards.J;
+  }
+  const highest = Math.max(...Object.values(cards)) + jokers;
+  const cardsType = Object.keys(cards).length;
+  if (cardsType <= 1) {
+    return 6;
+  }
+  if (cardsType === 2 && highest === 4) {
+    return 5;
+  }
+  if (cardsType === 2) {
+    return 4;
+  }
+  if (highest === 3) {
+    return 3;
+  }
+  if (cardsType === 3 && highest === 2) {
+    return 2;
+  }
+  if (highest === 2) {
+    return 1;
+  }
+  return 0;
 }
 
 function sortHands(a: Hand, b: Hand, cards: string, isJoker: boolean): number {
-  let [aScore, bScore] = [0, 0];
+  const aScore = getScore(a.hand, isJoker);
+  const bScore = getScore(b.hand, isJoker);
 
-  if (isJoker) {
-    aScore = getScoreJoker(a.hand);
-    bScore = getScoreJoker(b.hand);
-  } else {
-    aScore = getScore(a.hand);
-    bScore = getScore(b.hand);
-  }
   if (aScore === bScore) {
     for (let i = 0; i < 5; i += 1) {
       const aHigh = cards.indexOf(a.hand[i]);
