@@ -1,6 +1,8 @@
+.vscode/
 .idea/
 **/input.txt
 **/test.txt
+**/dist
 
 # Logs
 logs
