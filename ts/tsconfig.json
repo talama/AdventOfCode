@@ -5,6 +5,7 @@
     "target": "es6",
     "rootDir": "./",
     "outDir": "./dist/",
+    "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
