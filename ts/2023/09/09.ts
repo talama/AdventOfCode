@@ -1,33 +1,46 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-type History = {
-  values: number[];
-  prediction: number;
-};
-
-function format(input: string): History[] {
+function format(input: string) {
   const data = readFileSync(join(__dirname, input), 'utf-8').trim().split('\n');
-  return data.map((line) => {
-    const values = line.split(' ').map((num) => parseInt(num, 10));
-    const prediction = 0;
-    return { values: values, prediction: prediction };
-  });
+  return data.map((line) => line.split(' ').map((num) => parseInt(num, 10)));
 }
 
-function getPrediction(history: History): number {
-  if (!history.values.some((val) => val !== 0)) {
-    return history.prediction;
+function getNextSequence(sequence: number[]) {
+  const newSeq: number[] = [];
+  for (let i = 1; i < sequence.length; i += 1) {
+    newSeq.push(sequence[i] - sequence[i - 1]);
   }
-  const valEnd = history.values.length - 1;
-  const prediction = history.prediction + history.values[valEnd];
-  const values: number[] = [];
-  for (let i = 1; i <= valEnd; i += 1) {
-    values.push(history.values[i] - history.values[i - 1]);
+  return newSeq;
+}
+
+function getSequences(history: number[]) {
+  let [first, last] = [history[0], history[history.length - 1]];
+  const sequences: number[][] = [[first, last]];
+  let next = getNextSequence(history);
+  while (next.some((val) => val !== 0)) {
+    [first, last] = [next[0], next[next.length - 1]];
+    sequences.push([first, last]);
+    next = getNextSequence(next);
   }
-  return getPrediction({ values: values, prediction: prediction });
+  return sequences;
+}
+
+function solution1(sequences: number[][][]) {
+  const predictions = sequences.map((line) =>
+    line.reduce((acc, curr) => acc + curr[1], 0)
+  );
+  return predictions.reduce((acc, curr) => acc + curr);
+}
+
+function solution2(sequences: number[][][]) {
+  const predictions = sequences.map((line) =>
+    line.toReversed().reduce((acc, curr) => curr[0] - acc, 0)
+  );
+  return predictions.reduce((acc, curr) => acc + curr);
 }
 
 const report = format('input.txt');
-const solution1 = report.reduce((acc, curr) => acc + getPrediction(curr), 0);
-console.log(solution1);
+const sequences = report.map((line) => getSequences(line));
+console.log(`Solution1: ${solution1(sequences)}`);
+console.log(`Solution2: ${solution2(sequences)}`);
