@@ -1,37 +1,56 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-function format(input: string): [number[], number[][][]] {
+type Range = {
+  start: number;
+  end: number;
+  offset: number;
+};
+
+function format(input: string): [number[], Range[][]] {
   const data = readFileSync(join(__dirname, input), 'utf-8')
     .trim()
     .split('\n\n');
+
   const seeds = data
     .shift()!
     .split(/:\s+/)[1]
     .split(' ')
     .map((num) => parseInt(num, 10));
-  const almanac = data.map((line) => {
-    const values = line.split(':')[1].trim();
-    return values
+
+  const almanac = data.map((mapping) => {
+    const ranges = mapping
+      .split(':')[1]
+      .trim()
       .split('\n')
-      .map((str) => str.split(' ').map((num) => parseInt(num, 10)));
+      .map((range) => {
+        const [destination, source, length] = range
+          .trim()
+          .split(' ')
+          .map((num) => parseInt(num, 10));
+        return {
+          start: source,
+          end: source + length,
+          offset: destination - source,
+        };
+      })
+      .sort((rangeA, rangeB) => rangeA.start - rangeB.start);
+    return ranges;
   });
+
   return [seeds, almanac];
 }
 
-function mapSeed(mapping: number[][], seed: number) {
+function mapSeed(mapping: Range[], seed: number) {
   for (let i = 0; i < mapping.length; i += 1) {
-    const destStart = mapping[i][0];
-    const sourceStart = mapping[i][1];
-    const range = mapping[i][2];
-    if (seed >= sourceStart && seed <= sourceStart + range) {
-      return seed + (destStart - sourceStart);
+    if (seed >= mapping[i].start && seed <= mapping[i].end) {
+      return seed + mapping[i].offset;
     }
   }
   return seed;
 }
 
-function solution1(seeds: number[], almanac: number[][][]) {
+function solution1(seeds: number[], almanac: Range[][]) {
   return seeds
     .map((seed) => {
       let destination = seed;
@@ -43,5 +62,6 @@ function solution1(seeds: number[], almanac: number[][][]) {
     .reduce((acc, curr) => (curr < acc ? curr : acc));
 }
 
-const [seeds, almanac] = format('test2.txt');
+const [seeds, almanac] = format('input.txt');
+
 console.log(solution1(seeds, almanac));
