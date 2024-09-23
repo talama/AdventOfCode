@@ -1,3 +1,5 @@
+**/test.txt
+**/input.txt
 dist
 tmp
 /out-tsc
