@@ -3,10 +3,10 @@ tmp
 /out-tsc
 
 # dependencies
-node_modules
+node_modules/
 
 # IDEs and editors
-/.idea
+.idea/
 .project
 .classpath
 *.launch
@@ -35,3 +35,7 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
+!/node_modules/
+!/node_modules/
+!/node_modules/
+!/.idea/
