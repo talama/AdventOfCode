@@ -14,6 +14,8 @@ node_modules/*
 *.launch
 .settings/
 
+node_modules/
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
@@ -37,7 +39,4 @@ Thumbs.db
 
 .nx/cache
 .nx/workspace-data
-!/node_modules/
-!/node_modules/
-!/node_modules/
 !/.idea/
