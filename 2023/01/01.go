@@ -19,77 +19,76 @@ func main() {
 	}
 	defer file.Close()
 
-	var solution1, solution2 int
 	scanner := bufio.NewScanner(file)
+	var sum, sumWord int
 	for scanner.Scan() {
 		line := scanner.Text()
 
 		// Solution 1
-		first := findNum(line, "start", false)
-		last := findNum(line, "end", false)
+		first, last := findNum(line, false)
+		fmt.Println(first, last)
 		num, err := strconv.Atoi(first + last)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal()
 		}
-		solution1 += num
+		sum += num
 
 		// Solution 2
-		firstWord := findNum(line, "start", true)
-		lastWord := findNum(line, "end", true)
-		num, err = strconv.Atoi(firstWord + lastWord)
+		first, last = findNum(line, true)
+		num, err = strconv.Atoi(first + last)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal()
 		}
-		solution2 += num
+		sumWord += num
 	}
-	fmt.Printf("Solution1: %d\n", solution1)
-	fmt.Printf("Solution2: %d\n", solution2)
+	fmt.Printf("Solution 1: %d\n", sum)
+	fmt.Printf("Solution 2: %d\n", sumWord)
 }
 
-func findNum(line string, direction string, word bool) string {
-	runeLine := []rune(line)
-	lenght := len(runeLine) - 1
-	var start, end int
-
-	// for loop parameters dependign on which side of the string we start from
-	switch direction {
-	case "start":
-		start, end = 0, lenght
-	case "end":
-		start, end = -lenght, 0
-	default:
-		log.Fatal("Wrong direction")
-	}
-
-	var buf string
-	for i := start; i <= end; i += 1 {
-		idx := i
-		// if we start from end of the string make sure we use a positive index
-		if i < 0 {
-			idx = -i
-		}
-		char := string(runeLine[idx])
-		// if we find a number return it
-		if unicode.IsDigit(runeLine[idx]) {
-			return char
-		}
-
-		// if we are looking for numbers in word form too, add chars to buf and check for suffix or affix
-		// depending from which side of the string we are looking
-		if word {
-			if direction == "start" {
-				buf += char
-			} else {
-				buf = char + buf
-			}
-			for k, v := range digits {
-				if direction == "start" && strings.HasSuffix(buf, k) {
-					return v
-				} else if strings.HasPrefix(buf, k) {
-					return v
+// Find numbers in line, if word = true consider numbers in word form too ("one", "two" ...)
+func findNum(line string, word bool) (first, last string) {
+	// iterate from beginning of line until we find a number
+	for i, r := range line {
+		if unicode.IsDigit(r) {
+			first = string(r)
+			break
+		} else if word {
+			for key, val := range digits {
+				if strings.HasPrefix(line[i:], key) {
+					first = val
+					break
 				}
 			}
+			if first != "" {
+				break
+			}
 		}
 	}
-	return "0"
+
+	// If we went the whole string without finding a number we can return now (return 0 for both value)
+	if first == "" {
+		first = "0"
+		last = "0"
+		return
+	}
+
+	// iterate from the end of line until we find a number
+	runeLine := []rune(line)
+	for i := len(runeLine) - 1; i >= 0; i -= 1 {
+		if unicode.IsDigit(runeLine[i]) {
+			last = string(runeLine[i])
+			break
+		} else if word {
+			for key, val := range digits {
+				if strings.HasSuffix(line[:i+1], key) {
+					last = val
+					break
+				}
+			}
+			if last != "" {
+				break
+			}
+		}
+	}
+	return
 }
