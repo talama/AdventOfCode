@@ -47,8 +47,7 @@ function getNum(
 			return str[idx] ?? '0';
 		}
 		if (kind === 'word') {
-			// if we iterate from the end we need to reverse the string as we go
-			buf = from === 'start' ? buf.concat(str[idx] ?? '') : (str[idx] ?? '').concat(buf);
+			buf = from === 'start' ? str.slice(0, idx + 1) : str.slice(idx);
 			const found = findWord(buf);
 			if (found !== '0') {
 				return found;
