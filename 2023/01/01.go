@@ -26,7 +26,6 @@ func main() {
 
 		// Solution 1
 		first, last := findNum(line, false)
-		fmt.Println(first, last)
 		num, err := strconv.Atoi(first + last)
 		if err != nil {
 			log.Fatal()
