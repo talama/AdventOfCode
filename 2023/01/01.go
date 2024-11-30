@@ -17,7 +17,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatal(`Error closing input file`)
+		}
+	}(file)
 
 	scanner := bufio.NewScanner(file)
 	var sum, sumWord int
