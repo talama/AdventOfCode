@@ -12,11 +12,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error parsing file: %v", err)
 	}
-	solution1(list1, list2)
-	solution2(list1, list2)
+	fmt.Println("Solution 1:", solution1(list1, list2))
+	fmt.Println("Solution 2:", solution2(list1, list2))
 }
 
-func solution1(list1 []int, list2 []int) {
+func solution1(list1 []int, list2 []int) int {
 	var totalDistance int
 	for i, val1 := range list1 {
 		distance := val1 - list2[i]
@@ -26,10 +26,10 @@ func solution1(list1 []int, list2 []int) {
 			totalDistance += -distance
 		}
 	}
-	fmt.Println("Solution 1:", totalDistance)
+	return totalDistance
 }
 
-func solution2(list1 []int, list2 []int) {
+func solution2(list1 []int, list2 []int) int {
 	map2 := map[int]int{}
 	score := 0
 
@@ -42,7 +42,7 @@ func solution2(list1 []int, list2 []int) {
 		score += val * map2[val]
 	}
 
-	fmt.Println("Solution 2:", score)
+	return score
 }
 
 func parseFile(filename string) ([]int, []int, error) {
@@ -63,6 +63,7 @@ func parseFile(filename string) ([]int, []int, error) {
 	for {
 		var val1, val2 int
 		_, err := fmt.Fscanf(file, "%d %d\n", &val1, &val2)
+		// Ends the loop on EOF
 		if err != nil {
 			break
 		}
