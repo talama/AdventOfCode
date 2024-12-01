@@ -51,7 +51,7 @@ func main() {
 			sum += game.ID
 		}
 		// Solution 2
-		powerSum += (minSet.Red * minSet.Blue * minSet.Green)
+		powerSum += minSet.Red * minSet.Blue * minSet.Green
 	}
 	fmt.Printf("Solution 1: %d\n", sum)
 	fmt.Printf("Solution 2: %d\n", powerSum)
