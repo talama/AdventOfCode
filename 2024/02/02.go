@@ -15,27 +15,35 @@ func main() {
 		os.Exit(-1)
 	}
 
-	fmt.Println("Solution1:", solution1(reports))
-}
+	var safeCount, safeCountDamp int
 
-func solution1(reports [][]int) int {
-	var safeCount int
 	for _, report := range reports {
-		ascending := true
-		descending := true
-		for j := 1; j < len(report); j += 1 {
-			if report[j] <= report[j-1] || (report[j]-report[j-1]) > 3 {
-				ascending = false
-			}
-			if report[j] >= report[j-1] || (report[j-1]-report[j]) > 3 {
-				descending = false
-			}
-		}
-		if ascending || descending {
+		if isSafe(report) {
 			safeCount += 1
 		}
+		for i := range report {
+			clone := make([]int, 0, len(report)-1)
+			clone = append(clone, report[:i]...)
+			clone = append(clone, report[i+1:]...)
+			if isSafe(clone) {
+				safeCountDamp += 1
+				break
+			}
+		}
 	}
-	return safeCount
+	fmt.Println("Solution1:", safeCount)
+	fmt.Println("Solution2:", safeCountDamp)
+}
+
+func isSafe(report []int) bool {
+	for i := 0; i < len(report)-1; i += 1 {
+		arrDir := report[0] - report[1] // positive if descending, negative ascending
+		dist := report[i] - report[i+1]
+		if dist*arrDir <= 0 || dist < -3 || dist > 3 {
+			return false
+		}
+	}
+	return true
 }
 
 func format(filename string) ([][]int, error) {
