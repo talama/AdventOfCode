@@ -5,45 +5,54 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	reports, err := format("input.txt")
+	reports, err := format("test.txt")
 	if err != nil {
 		os.Exit(-1)
 	}
 
-	var safeCount, safeCountDamp int
+	var safeCount, safeRemoved int
 
 	for _, report := range reports {
-		if isSafe(report) {
+		if isSafe(report, false) {
 			safeCount += 1
 		}
-		for i := range report {
-			clone := make([]int, 0, len(report)-1)
-			clone = append(clone, report[:i]...)
-			clone = append(clone, report[i+1:]...)
-			if isSafe(clone) {
-				safeCountDamp += 1
-				break
-			}
+		if isSafe(report, true) {
+			safeRemoved += 1
 		}
 	}
 	fmt.Println("Solution1:", safeCount)
-	fmt.Println("Solution2:", safeCountDamp)
+	fmt.Println("Solution1:", safeRemoved)
 }
 
-func isSafe(report []int) bool {
+func isSafe(report []int, remove bool) bool {
 	for i := 0; i < len(report)-1; i += 1 {
 		arrDir := report[0] - report[1] // positive if descending, negative ascending
 		dist := report[i] - report[i+1]
 		if dist*arrDir <= 0 || dist < -3 || dist > 3 {
-			return false
+			return remove && searchSafe(report, i)
 		}
 	}
 	return true
+}
+
+func searchSafe(report []int, idx int) bool {
+	var removeNext, removeCurr []int
+	if idx+1 < len(report) {
+		removeCurr = slices.Delete(slices.Clone(report), idx, idx+1)
+		fmt.Println("removeCurr is:", isSafe(removeCurr, false))
+	}
+	if idx+2 < len(report) {
+		removeNext = slices.Delete(slices.Clone(report), idx+1, idx+2)
+		fmt.Println("removeNext is:", isSafe(removeNext, false))
+	}
+
+	return isSafe(removeCurr, false) || isSafe(removeNext, false)
 }
 
 func format(filename string) ([][]int, error) {
