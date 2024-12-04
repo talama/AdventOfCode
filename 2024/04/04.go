@@ -59,15 +59,17 @@ func findWord(puzzle [][]string, word string, rowIdx, colIdx int) int {
 }
 
 // Given a [][]string and a starting point (rowIdx, colIdx) find if 2 occurences of the word in an X shape form exist around that point
-// This implementation only works for 3 letter words. Its easy to extend it to work for words of odd letters of any lenght.
+// This implementation only works for words with an odd number of letters
 func findWordX(puzzle [][]string, word string, rowIdx, colIdx int) bool {
 	directions := [][]int{{-1, -1}, {-1, 1}, {1, -1}, {1, 1}}
-
 	var found bool
 	var wordCount int
+
 	for _, dir := range directions {
-		currRow := rowIdx - dir[0]
-		currCol := colIdx - dir[1]
+		// Move in the opposite direction of dir for enough distance to move to where the beginning of the word
+		halfLength := len(word) / 2
+		currRow := rowIdx - (dir[0] * halfLength)
+		currCol := colIdx - (dir[1] * halfLength)
 		for _, char := range word {
 			if currRow < 0 || currRow >= len(puzzle) || currCol < 0 || currCol >= len(puzzle[0]) || puzzle[currRow][currCol] != string(char) {
 				found = false
