@@ -20,7 +20,7 @@ func TestPart1(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isSafe(tt.input); got != tt.want {
+			if got := isSafe(tt.input, false); got != tt.want {
 				t.Errorf("got %t, want %t", got, tt.want)
 			}
 		})
@@ -43,17 +43,7 @@ func TestPart2(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := false
-			for i := range tt.input {
-				clone := make([]int, 0, len(tt.input)-1)
-				clone = append(clone, tt.input[:i]...)
-				clone = append(clone, tt.input[i+1:]...)
-				if isSafe(clone) {
-					got = true
-					break
-				}
-			}
-			if got != tt.want {
+			if got := isSafe(tt.input, true); got != tt.want {
 				t.Errorf("got %t, want %t", got, tt.want)
 			}
 		})
