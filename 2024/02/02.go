@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	reports, err := format("test.txt")
+	reports, err := format("input.txt")
 	if err != nil {
 		os.Exit(-1)
 	}
@@ -21,16 +21,22 @@ func main() {
 	for _, report := range reports {
 		if isSafe(report, false) {
 			safeCount += 1
-		}
-		if isSafe(report, true) {
 			safeRemoved += 1
+		} else {
+			if isSafe(report, true) {
+				safeRemoved += 1
+			}
 		}
 	}
 	fmt.Println("Solution1:", safeCount)
 	fmt.Println("Solution1:", safeRemoved)
 }
 
+// if remove == true, on failure we call safeSearch passing the index at which we failed
 func isSafe(report []int, remove bool) bool {
+	if len(report) == 0 {
+		return false
+	}
 	for i := 0; i < len(report)-1; i += 1 {
 		arrDir := report[0] - report[1] // positive if descending, negative ascending
 		dist := report[i] - report[i+1]
@@ -41,18 +47,15 @@ func isSafe(report []int, remove bool) bool {
 	return true
 }
 
+// We try removing the element at the index where isSafe failed, the elemnt before(if it exist) and the element after that
 func searchSafe(report []int, idx int) bool {
-	var removeNext, removeCurr []int
-	if idx+1 < len(report) {
-		removeCurr = slices.Delete(slices.Clone(report), idx, idx+1)
-		fmt.Println("removeCurr is:", isSafe(removeCurr, false))
+	var removeCurr, removePrev, removeNext []int
+	removeCurr = slices.Delete(slices.Clone(report), idx, idx+1)
+	removeNext = slices.Delete(slices.Clone(report), idx+1, idx+2)
+	if idx-1 >= 0 {
+		removePrev = slices.Delete(slices.Clone(report), idx-1, idx)
 	}
-	if idx+2 < len(report) {
-		removeNext = slices.Delete(slices.Clone(report), idx+1, idx+2)
-		fmt.Println("removeNext is:", isSafe(removeNext, false))
-	}
-
-	return isSafe(removeCurr, false) || isSafe(removeNext, false)
+	return isSafe(removeCurr, false) || isSafe(removeNext, false) || isSafe(removePrev, false)
 }
 
 func format(filename string) ([][]int, error) {
