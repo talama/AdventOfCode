@@ -14,17 +14,21 @@ func main() {
 		log.Fatalf("Error reading file: %v", err)
 	}
 
-	word1 := "XMAS"
 	var solution1 int
+	var solution2 int
 
 	for rowIdx, row := range puzzle {
 		for colIdx := range row {
-			if puzzle[rowIdx][colIdx] == string(word1[0]) {
-				solution1 += findWord(puzzle, word1, rowIdx, colIdx)
+			if puzzle[rowIdx][colIdx] == "X" {
+				solution1 += findWord(puzzle, "XMAS", rowIdx, colIdx)
+			}
+			if puzzle[rowIdx][colIdx] == "A" && findWordX(puzzle, "MAS", rowIdx, colIdx) {
+				solution2 += 1
 			}
 		}
 	}
 	fmt.Println("Solution1:", solution1)
+	fmt.Println("Solution2:", solution2)
 }
 
 // Given a [][]string and a starting point (rowIdx, rowCol), find each occurence of "word" going in all directions.
@@ -41,11 +45,7 @@ func findWord(puzzle [][]string, word string, rowIdx, colIdx int) int {
 			currRow += dir[0]
 			currCol += dir[1]
 
-			if currRow < 0 || currRow >= len(puzzle) || currCol < 0 || currCol >= len(puzzle[0]) {
-				found = false
-				break
-			}
-			if puzzle[currRow][currCol] != string(char) {
+			if currRow < 0 || currRow >= len(puzzle) || currCol < 0 || currCol >= len(puzzle[0]) || puzzle[currRow][currCol] != string(char) {
 				found = false
 				break
 			}
@@ -56,6 +56,32 @@ func findWord(puzzle [][]string, word string, rowIdx, colIdx int) int {
 		}
 	}
 	return wordCount
+}
+
+// Given a [][]string and a starting point (rowIdx, colIdx) find if 2 occurences of the word in an X shape form exist around that point
+// This implementation only works for 3 letter words. Its easy to extend it to work for words of odd letters of any lenght.
+func findWordX(puzzle [][]string, word string, rowIdx, colIdx int) bool {
+	directions := [][]int{{-1, -1}, {-1, 1}, {1, -1}, {1, 1}}
+
+	var found bool
+	var wordCount int
+	for _, dir := range directions {
+		currRow := rowIdx - dir[0]
+		currCol := colIdx - dir[1]
+		for _, char := range word {
+			if currRow < 0 || currRow >= len(puzzle) || currCol < 0 || currCol >= len(puzzle[0]) || puzzle[currRow][currCol] != string(char) {
+				found = false
+				break
+			}
+			found = true
+			currRow += dir[0]
+			currCol += dir[1]
+		}
+		if found {
+			wordCount += 1
+		}
+	}
+	return wordCount == 2
 }
 
 func format(filename string) ([][]string, error) {
