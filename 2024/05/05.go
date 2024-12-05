@@ -4,36 +4,40 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
 
 func main() {
-	var result int
+	var solution1, solution2 int
 	rules, updates, err := format("input.txt")
 	if err != nil {
 		log.Fatalf("Error reading file: %v", err)
 	}
-	for _, update := range updates {
-		if isSorted(update, rules) {
-			mid, _ := strconv.Atoi(string(update[len(update)/2]))
-			fmt.Println(mid)
-			result += mid
-		}
-	}
-	fmt.Println("Solution1:", result)
-}
 
-func isSorted(update []string, rules []string) bool {
-	for i := 0; i < len(update)-1; i += 1 {
+	cmp := func(a, b string) int {
 		for _, rule := range rules {
 			values := strings.Split(rule, "|")
-			if update[i] == values[1] && update[i+1] == values[0] {
-				return false
+			if values[0] == a && values[1] == b {
+				return -1
 			}
 		}
+		return 0
 	}
-	return true
+
+	for _, update := range updates {
+		if slices.IsSortedFunc(update, cmp) {
+			mid, _ := strconv.Atoi(string(update[len(update)/2]))
+			solution1 += mid
+		} else {
+			slices.SortFunc(update, cmp)
+			mid, _ := strconv.Atoi(string(update[len(update)/2]))
+			solution2 += mid
+		}
+	}
+	fmt.Println("Solution1:", solution1)
+	fmt.Println("Solution2:", solution2)
 }
 
 func format(filename string) ([]string, [][]string, error) {
