@@ -20,22 +20,34 @@ func main() {
 		log.Fatalf("Error opening file: %v", err)
 	}
 
-	var solution1 int
+	var solution1, solution2 int
 	for _, eq := range equations {
-		if isSolvable(eq) {
+		if isSolvable(eq, false) {
 			solution1 += eq.result
+			solution2 += eq.result
+		} else if isSolvable(eq, true) {
+			solution2 += eq.result
 		}
 	}
 	fmt.Println("Solution 1:", solution1)
+	fmt.Println("Solution 2:", solution2)
 }
 
-func isSolvable(eq Equation) bool {
+func isSolvable(eq Equation, concat bool) bool {
 	if len(eq.values) == 1 {
 		return eq.values[0] == eq.result
 	}
 	add := Equation{values: append([]int{eq.values[0] + eq.values[1]}, eq.values[2:]...), result: eq.result}
 	mul := Equation{values: append([]int{eq.values[0] * eq.values[1]}, eq.values[2:]...), result: eq.result}
-	return isSolvable(add) || isSolvable(mul)
+	var conc Equation
+	if concat {
+		val, err := strconv.Atoi(fmt.Sprintf("%d%d", eq.values[0], eq.values[1]))
+		if err != nil {
+			log.Fatalf("Error closing file: %v", err)
+		}
+		conc = Equation{values: append([]int{val}, eq.values[2:]...), result: eq.result}
+	}
+	return isSolvable(add, concat) || isSolvable(mul, concat) || (concat && isSolvable(conc, true))
 }
 
 func format(filename string) ([]Equation, error) {
@@ -63,12 +75,12 @@ func format(filename string) ([]Equation, error) {
 		}
 		values := strings.Split(parts[1], " ")
 		for _, val := range values {
-			val, err := strconv.Atoi(val)
+			num, err := strconv.Atoi(val)
 			if err != nil {
 				log.Printf("Error converting from string to integer: %v", err)
 				return nil, err
 			}
-			equation.values = append(equation.values, val)
+			equation.values = append(equation.values, num)
 		}
 		equations = append(equations, equation)
 	}
