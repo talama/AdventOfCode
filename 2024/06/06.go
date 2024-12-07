@@ -13,14 +13,24 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error opening file: %v", err)
 	}
-	walked := walk(grid, start)
+	walked := walk(grid, start, image.Point{-1, -1})
 	fmt.Println("Solution1:", len(walked))
+
+	var loops int
+	for obstacle := range walked {
+		if obstacle == start {
+			continue
+		}
+		if walk(grid, start, obstacle) == nil {
+			loops += 1
+		}
+	}
+	fmt.Println("Solution2:", loops)
 }
 
-func walk(grid map[image.Point]rune, start image.Point) map[image.Point]rune {
+func walk(grid map[image.Point]rune, start image.Point, obstacle image.Point) map[image.Point]int {
 	dirs := []image.Point{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
-	walked := map[image.Point]rune{}
-
+	walked := map[image.Point]int{}
 	position := start
 	var currDir int
 
@@ -28,9 +38,17 @@ func walk(grid map[image.Point]rune, start image.Point) map[image.Point]rune {
 		if _, ok := grid[position]; !ok {
 			return walked
 		}
-		walked[position] = grid[position]
+		// if we already visited from the same direction => loop
+		if 1<<currDir&walked[position] != 0 {
+			return nil
+		}
+
+		// keep track of which directions we visited the position from
+		walked[position] |= 1 << currDir
+
+		// Find next position and if needed next direction
 		next := position.Add(dirs[currDir])
-		for grid[next] == '#' {
+		for grid[next] == '#' || next == obstacle {
 			currDir = (currDir + 1) % len(dirs)
 			next = position.Add(dirs[currDir])
 		}
