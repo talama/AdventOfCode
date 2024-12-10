@@ -31,7 +31,7 @@ func getCheckSum(data string) int {
 
 	for i, r := range data {
 		val := int(r - '0')
-		// if we move past the index of the last moved file
+		// if we reach the index of last moved file
 		// finish moving the remaining blocks if any, then exit
 		if i >= tail {
 			for range blocks {
