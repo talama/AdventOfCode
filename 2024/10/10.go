@@ -10,13 +10,15 @@ import (
 
 func main() {
 	grid := format("input.txt")
-	var solution1 int
+	var solution1, solution2 int
 	for point := range grid {
 		if grid[point] == '0' {
 			solution1 += dfs(grid, point, map[image.Point]bool{})
+			solution2 += dfs(grid, point, nil)
 		}
 	}
 	fmt.Println("Solution 1:", solution1)
+	fmt.Println("Solution 2:", solution2)
 }
 
 func dfs(grid map[image.Point]rune, point image.Point, visited map[image.Point]bool) (score int) {
@@ -24,7 +26,9 @@ func dfs(grid map[image.Point]rune, point image.Point, visited map[image.Point]b
 		if visited[point] {
 			return 0
 		}
-		visited[point] = true
+		if visited != nil {
+			visited[point] = true
+		}
 		return 1
 	}
 
